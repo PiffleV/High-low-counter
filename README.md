@@ -4,7 +4,7 @@ Simple Expected-Value and Card counter built for the discord Unbelievaboat highe
 For linux:
 ```
 g++ @build.rsp
-./app
+./app.out
 ```
 ## Usage
 

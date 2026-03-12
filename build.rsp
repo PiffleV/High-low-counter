@@ -1,0 +1,8 @@
+-std=c++20
+-O2
+-Wall
+-Wextra
+
+src/main.cpp
+
+-o app

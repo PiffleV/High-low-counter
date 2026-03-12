@@ -7,6 +7,12 @@
 #include <filesystem>
 #include <unordered_map>
 using namespace std;
+class outOfBounds : public runtime_error {
+public:
+    explicit outOfBounds(const std::string& message) : runtime_error(message){
+
+    }
+};
 vector<int> newDeck(int decks) { // Simple Deck Builder
     vector<int> n{};
     for (int i = 1; i <= 13; i++) { // 13 cards in a deck
@@ -40,11 +46,20 @@ int sanitizeInt(string s) {
     while (value == -1) {
         if (s == "exit") {
             return -1;
+        } else if (s == "p") {
+            return 14;
         }
         try { // Check if number
             value = stoi(s);
+            if (value > 13 or value < 1) {
+                throw outOfBounds("Out of Bounds");
+            }
         } catch (const invalid_argument& e) {
             cout << "Not a number" << endl;
+            getline(cin >> ws, s);
+        } catch (const outOfBounds& e) {
+            cout << "Out of bounds" << endl;
+            value = -1;
             getline(cin >> ws, s);
         } catch (...) {
             cout << "Unexpected Error." << endl;
@@ -112,7 +127,7 @@ R"(1,1.05,1.05,13
     cout << "Make sure this starts on a shuffle (cards left = 155)" << endl; // Reminder
     std::string card;
     while (card != "exit") {
-        cout << "Enter card value, or type \"exit\" to exit" << endl;
+        cout << "Enter card value, p to peek, or type \"exit\" to exit" << endl;
         getline(cin >> ws, card);
         int value = sanitizeInt(card);
         if (value == -1) {
@@ -135,7 +150,7 @@ R"(1,1.05,1.05,13
                 numSame++;
             }
         }
-        float highChance = ((float)numHigher/deck.size());
+        float highChance = ((float)numHigher/deck.size()); // Calculate percentages and EVs
         float lowChance = ((float)numLower/deck.size());
         float sameChance = ((float)numSame/deck.size());
         unordered_map<char, float> multForCard = multValues[value];
@@ -145,7 +160,7 @@ R"(1,1.05,1.05,13
         cout << "Higher %: " << to_string(highChance*100) << "%, EV: " << to_string(evHigh) << ", " << endl;
         cout << "Lower %: " << to_string(lowChance*100) << "%, EV: " << to_string(evLow) << ", " << endl;
         cout << "Same %: " << to_string(sameChance*100) << "%, EV: " << to_string(evSame) << ", " << endl;
-        cout << "Enter dealer card, or type \"exit\" to exit" << endl;
+        cout << "Enter dealer card, or type \"exit\" to exit" << endl; // Get and remove dealer's card
         getline(cin >> ws, card);
         value = sanitizeInt(card);
         if (value == -1) {
@@ -156,10 +171,10 @@ R"(1,1.05,1.05,13
             cerr << "Deck here and unb deck are desynced; terminating program" << endl;
             return 0;
         }
-        deck.erase(item);
+        deck.erase(item); // Account for shuffling
         if (deck.size() == 0) {
             deck = newDeck(3);
         }
     }
-    return 0;
+    return 1;
 }

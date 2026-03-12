@@ -7,13 +7,16 @@
 #include <filesystem>
 #include <unordered_map>
 using namespace std;
+// custom error
 class outOfBounds : public runtime_error {
 public:
     explicit outOfBounds(const std::string& message) : runtime_error(message){
 
     }
 };
-vector<int> newDeck(int decks) { // Simple Deck Builder
+
+// Simple Deck Builder
+vector<int> newDeck(int decks) { 
     vector<int> n{};
     for (int i = 1; i <= 13; i++) { // 13 cards in a deck
         for (int q = 0; q < 4*decks; q++) { // 4 cards per deck
@@ -22,6 +25,8 @@ vector<int> newDeck(int decks) { // Simple Deck Builder
     }
     return n;
 }
+
+// Get File or create if doesnt exist
 fstream retFile(string file, string base) {
     if (!filesystem::exists(file)) {
         cout << "File " << file << " does not exist, using template" << endl;
@@ -41,13 +46,18 @@ fstream retFile(string file, string base) {
         return f;
     }
 }
+// Command to int
+const unordered_map<string, int> commandValues {
+    {"e", -1},
+    {"h", 14},
+    {"p", 15}
+};
+// Make sure int is in bounds and is an int
 int sanitizeInt(string s) {
     int value = -1;
     while (value == -1) {
-        if (s == "exit") {
-            return -1;
-        } else if (s == "p") {
-            return 14;
+        if (commandValues.count(s)) {
+            return commandValues.at(s);
         }
         try { // Check if number
             value = stoi(s);
@@ -68,9 +78,28 @@ int sanitizeInt(string s) {
     }
     return value;
 }
+
+// For a command
+int cardCommand(int value, vector<int> deck) {
+    if (value == commandValues.at("h")) {
+        cout << "e to exit, p to peek" << endl;
+        return 1;
+    } else if (value == commandValues.at("p")) {
+        cout << "[";
+        for (auto card : deck) {
+            cout << card << ", ";
+        }
+        cout << "\b \b\b \b]" << endl;
+        return 1;
+    }
+    return 0;
+}
+
+// Calculate EV
 float ev(float winChance, float mult) {
     return (winChance*(mult-1))-(1-winChance);
 }
+
 int main() {
     vector<int> deck = newDeck(3);
     fstream dataFile = retFile("multData.csv", // Num, Higher Mult, Lower Mult, Same Mult
@@ -127,11 +156,14 @@ R"(1,1.05,1.05,13
     cout << "Make sure this starts on a shuffle (cards left = 155)" << endl; // Reminder
     std::string card;
     while (card != "exit") {
-        cout << "Enter card value, p to peek, or type \"exit\" to exit" << endl;
+        cout << "Enter card value, or h to view commands" << endl;
         getline(cin >> ws, card);
         int value = sanitizeInt(card);
         if (value == -1) {
             return 0;
+        } if (value > 13) {
+            cardCommand(value, deck);
+            continue;
         }
         auto item = find(deck.begin(), deck.end(), value);
         if (item == deck.end()) { // Account for desync
@@ -153,16 +185,20 @@ R"(1,1.05,1.05,13
         float highChance = ((float)numHigher/deck.size()); // Calculate percentages and EVs
         float lowChance = ((float)numLower/deck.size());
         float sameChance = ((float)numSame/deck.size());
-        unordered_map<char, float> multForCard = multValues[value];
+        unordered_map<char, float> multForCard = multValues.at(value);
         float evHigh = ev(highChance,multForCard['h']);
         float evLow = ev(lowChance,multForCard['l']);
         float evSame = ev(sameChance,multForCard['s']);
         cout << "Higher %: " << to_string(highChance*100) << "%, EV: " << to_string(evHigh) << ", " << endl;
         cout << "Lower %: " << to_string(lowChance*100) << "%, EV: " << to_string(evLow) << ", " << endl;
         cout << "Same %: " << to_string(sameChance*100) << "%, EV: " << to_string(evSame) << ", " << endl;
-        cout << "Enter dealer card, or type \"exit\" to exit" << endl; // Get and remove dealer's card
+        dealerInput: cout << "Enter dealer card, or h to view commands" << endl; // Get and remove dealer's card
         getline(cin >> ws, card);
         value = sanitizeInt(card);
+        if (value > 13) {
+            cardCommand(value, deck);
+            goto dealerInput; // Cleaner than a weird while loop personally
+        }
         if (value == -1) {
             return 0;
         }

@@ -7,6 +7,8 @@ g++ @build.rsp
 ./app
 ```
 ## Usage
+Note: App not done (yet)
+
 1. Build and run the program
 2. Run the program
 3. Start a new game of higher or lower, or input the cards from your active games starting from when the deck was full

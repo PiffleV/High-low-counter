@@ -1,10 +1,16 @@
 # High-low Counter
 Simple Expected-Value and Card counter built for the discord Unbelievaboat higher or lower game
 ## Installation
-For linux:
+For linux g++:
 ```
-g++ @build.rsp
+g++ @buildGPP.rsp
 ./app.out
+```
+
+For windows cl.exe:
+```
+cl.exe "@buildCLexe.rsp"
+./app.exe
 ```
 ## Usage
 

@@ -1,0 +1,5 @@
+.\src\main.cpp
+/EHsc 
+/Fe".\app.exe" 
+/Fo".\app.obj" 
+/std:c++20

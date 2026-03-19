@@ -1,11 +1,19 @@
-#include <vector>
-#include <variant>
+//streams and strings
+#include <string>
+#include <sstream>
+#include <fstream>
+#include <iostream>
+
+// Collections
+#include <vector> 
 #include <algorithm>
 #include <iterator>
-#include <iostream>
-#include <fstream>
-#include <filesystem>
 #include <unordered_map>
+
+// Other
+#include <filesystem>
+#include <variant>
+
 using namespace std;
 // custom error
 class outOfBounds : public runtime_error {
@@ -61,7 +69,7 @@ int sanitizeInt(string s) {
         }
         try { // Check if number
             value = stoi(s);
-            if (value > 13 or value < 1) {
+            if (value > 13 || value < 1) {
                 throw outOfBounds("Out of Bounds");
             }
         } catch (const invalid_argument& e) {
